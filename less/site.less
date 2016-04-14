@@ -1,0 +1,42 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,600);
+
+@background-color: #FEFFF8;
+@border-color: #B2B3A3;
+
+body {
+    background-color: #FEFFF8;
+    font-family: 'Open Sans', sans-serif;
+}
+
+
+.hyperview {
+    // border: 1px solid @border-color;
+}
+
+.node {
+  fill: white;
+  stroke: @border-color;
+
+  text {
+    // stroke: none;
+    font-size: 1em;
+    fill: red;
+    // stroke: black;
+  }
+}
+
+
+g.planes {
+
+  circle {
+    fill-opacity: 0;
+    stroke-opacity: 0.5;
+    stroke: @border-color;
+    // stroke: "black";
+  }
+
+}
+
+line {
+  stroke: @border-color;
+}
