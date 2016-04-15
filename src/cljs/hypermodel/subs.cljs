@@ -16,3 +16,14 @@
   :tiers
   (fn [db [_ tier]]
     (reaction (tier (:tiers @db)))))
+
+(re-frame/register-sub
+  :data-view
+  (fn [db [_ tier]]
+    (reaction (:data-view @db))))
+
+(re-frame/register-sub
+  :selectable
+  (fn [db _]
+    (let [dv (re-frame/subscribe [:data-view])]
+      (reaction (-> @db :model (-> @dv :selected))))))

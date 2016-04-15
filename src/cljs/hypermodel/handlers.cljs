@@ -21,16 +21,64 @@
  (fn  [_ _]
    db/default-db))
 
-(defn get-random-from [col n]
-  (map (fn [x] (-> (nth col x) second :referencedType)) (unique-random-numbers 3)))
+
+
+;(defn get-random-from [model class quantity]
+;  (let [candidates (-> model class :collections seq)]
+;    ;(println "candidates" candidates)
+;    (map (fn [x]
+;           (println "RAND GOT" x)
+;           (-> (nth candidates x) second :referencedType)) (unique-random-numbers quantity))))
+
+;(assoc total
+;  (keyword (str next)) (reduce conj [] (map #(assoc {} :node % :parent nil) (get-random-from (-> db :model) :Gene 1)) ))
+
+(defn get-random-from [model class quantity]
+  (let [pool (merge (:collections (class model)) (:references (class model)))
+        candidates (seq pool)]
+    ;(println "POOL" pool)
+    (map (fn [x]
+           (-> (nth candidates x) second :referencedType keyword))
+         [1 2])))
+
+
+;(map (fn [i]
+;       (println "sees i" i)
+;       (println "returning" (get-random-from (-> db :model) (keyword i) 1))
+;       (get-random-from (-> db :model) (keyword i) 1))
+;     (map :node ((keyword (str (dec next))) total)))
+
 
 (re-frame/register-handler
   :fill-tiers
   (fn [db _]
     (let [cols (-> db :model :Gene :collections seq)]
-      (fn [re])
-      (println "random" (get-random-from cols 4)))
-    db))
+
+      (println "running" (reduce
+                           (fn [total next]
+                             (let [parents (map :node ((keyword (str (dec next))) total))]
+                               (assoc total (keyword (str next))
+                                            (mapcat (fn [parent]
+                                                      (map (fn [rando] (assoc {} :node rando :parent parent))
+                                                           (get-random-from (-> db :model) parent 3)))
+
+                                                    parents))
+                               ))
+                           {:1 [{:node :Gene :parent nil}]}
+                           [2 3]))
+
+      (assoc db :tiers (reduce
+                         (fn [total next]
+                           (let [parents (map :node ((keyword (str (dec next))) total))]
+                             (assoc total (keyword (str next))
+                                          (vec (mapcat (fn [parent]
+                                                     (map (fn [rando] (assoc {} :node rando :parent parent))
+                                                          (get-random-from (-> db :model) parent 3)))
+
+                                                   parents)))
+                             ))
+                         {:1 [{:node :Gene :parent nil}]}
+                         [2 3])))))
 
 (re-frame/register-handler
   :handle-bootstrap-model
@@ -44,3 +92,9 @@
     (println "running")
     (go (re-frame/dispatch [:handle-bootstrap-model (<! (model "www.flymine.org/query")) ]))
     db))
+
+(re-frame/register-handler
+  :click-node
+  (fn [db [_ label tier]]
+    (assoc-in db [:data-view] {:selected (keyword label)
+                               :tier tier})))

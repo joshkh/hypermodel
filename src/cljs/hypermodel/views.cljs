@@ -4,8 +4,8 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]))
 
-(def dimensions (reagent/atom {:width 500
-                               :height 500}))
+(def dimensions (reagent/atom {:width 400
+                               :height 400}))
 
 (def center-str
   (str "translate("
@@ -45,13 +45,15 @@
 
 (defn dot []
   (fn [{:keys [label tier index total]}]
+    (println "creating dot for label" label)
     [:g.node {:transform (str "rotate(" (* index (/ 360 total)) ")")}
      [:line {:x1 0 :y1 0 :x2 0 :y2 (* -1 (plane-scale tier))}]
-     [:circle {:cx 0
+     [:circle {:on-click #(re-frame/dispatch [:click-node label tier])
+               :cx 0
                :cy (* -1 (plane-scale tier))
-               :r (- 60 (* tier 20))}]
+               :r 20}]
      [:text {:y (* -1 (plane-scale tier))
-             :text-anchor "middle"} label]]))
+             :text-anchor "middle"} (str label)]]))
 
 (defn some-plane [tier]
   (let [nodes-on-tier (re-frame/subscribe [:tiers (keyword (str tier))])]
@@ -86,9 +88,20 @@
    [planes]
    [model]])
 
+(defn data-viewer []
+  (let [data (re-frame/subscribe [:selectable])]
+    (fn []
+      [:div
+       [:h4 "Data"]
+       (if-not @data
+         [:span "(Nothing available.)"]
+         [:span (str @data)])])))
 
 (defn main-panel []
   (let [name (re-frame/subscribe [:name])]
     (fn []
-      [:div
-       [svg-body]])))
+      [:div.row
+       [:div.col-xs-6
+        [svg-body]]
+       [:div.col-xs-6]
+       [data-viewer]])))
