@@ -21,14 +21,6 @@
 
 (println "scales" (map plane-scale (range 1 4)))
 
-
-
-
-;(println "X" (+ 300 (* 140 (-> js/Math (.sin 0)))))
-;(println "Y" (- 300 (* 140 (-> js/Math (.cos 0)))))
-
-;(println plane-scale)
-
 (defn plane-guide []
   (fn [radius]
     ;(println "plane got r" r)
@@ -48,20 +40,6 @@
      [:circle {:r 40}]
      [:text {:text-anchor "middle"}
       (:node details)]]))
-
-
-
-
-;(defn plane []
-;  (fn []
-;    [:g.nodes {:transform center-str}
-;     (loop [idx 0 total [:g]]
-;       (if (= idx (count dots))
-;         total
-;         (recur (inc idx) (conj total [dot {:index (inc idx)
-;                                            :total (count dots)}]))))
-;     [node {:node "A"}]]))
-
 
 (def dots ["A" "B" "C" "D" "E"])
 
@@ -93,6 +71,10 @@
    (for [tier (range 1 4)]
      [some-plane tier])])
 
+(defn model []
+  (let [model (re-frame/subscribe [:model])]
+    [:div (str @model)]))
+
 
 (defn svg-body []
   [:svg.hyperview {:shape-rendering "crispEdges"
@@ -101,7 +83,8 @@
                    :height (:height @dimensions)
                    :id "canvas"}
    [plane-guides]
-   [planes]])
+   [planes]
+   [model]])
 
 
 (defn main-panel []

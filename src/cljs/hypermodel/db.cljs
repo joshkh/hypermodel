@@ -21,8 +21,6 @@
                 :parent "A"}
                {:node "J3"
                 :parent "A"}]}
-   :model {:node "Gene"
-           :children [{:node "B"}
-                      {:node "C"}]}})
+   :model {}})
 
 
