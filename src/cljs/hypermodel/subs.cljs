@@ -16,3 +16,8 @@
   :tiers
   (fn [db [_ tier]]
     (reaction (tier (:tiers @db)))))
+
+(re-frame/register-sub
+  :data-rows
+  (fn [db [_ degree]]
+    (reaction (nth (:new @db) degree))))
