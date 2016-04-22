@@ -1,10 +1,8 @@
 (enable-console-print!)
 
-(ns hypermodel.views
+(ns hypermodel.radial
   (:require [re-frame.core :as re-frame]
-            [reagent.core :as reagent]
-            [hypermodel.radial :as radial]
-            [hypermodel.transforms :as t]))
+            [reagent.core :as reagent]))
 
 (def dimensions (reagent/atom {:width 500
                                :height 500}))
@@ -60,7 +58,7 @@
                ;:r (- 60 (* tier 20))
                ;:r (* 60 (/ 1 tier))
                :r (* 30 (/ 1 (inc tier)))
-                ;:r 0
+               ;:r 0
                }]
      [:text {:y (* -1 (plane-scale tier))
              :text-anchor "middle"} (str (name label))]]))
@@ -143,25 +141,95 @@
                    :height (:height @dimensions)
                    :id "canvas"}
    [plane-guides]
-   [:g {:transform center-str}
-    (for [a (range 0 360 )]
-      (let [pos (t/radial 0 0 100 a)]
-        (println pos)
-        [:circle {:cx (:x pos)
-                  :cy (:y pos)
-                  :r 1}]))]
    ;[planes]
-   ;[links]
-   ;[dr]
-   ;[model]
-   ])
+   [links]
+   [dr]
+   [model]])
 
+(defn make-tree-layout []
+  (-> js/d3
+      .-layout
+      .tree
+      (.size #js [360 150])
+      (.separation (fn [a b]
+                     (if (= (.-parent a) (.-parent b))
+                       1
+                       2)))))
+
+(defn make-diagonal []
+  (-> js/d3
+      .-svg
+      .-diagonal
+      .radial
+      (.projection (fn [d]
+                     (clj->js [(.-y d) (* (/ (.-x d) 180) (.-PI js/Math))])
+                     ;(clj->js [1 1])
+                     ))))
+
+(defn make-svg []
+  (-> js/d3
+      (.select "body")
+      (.append "svg")
+      (.attr "width" 500)
+      (.attr "height" 500)
+      (.append "g")
+      (.attr "transform" "translate(250,250)")))
+
+
+
+(defn diag []
+  (fn []
+    (let [tree (make-tree-layout)
+          diagonal (make-diagonal)
+          svg (make-svg)]
+      (-> js/d3
+          (.json "http://localhost:9001/flare.json"
+                 (fn [error root]
+                   (let [nodes (.nodes tree root)
+                         links (.links tree nodes)]
+                     ;(println "nodes" nodes)
+                     (-> svg
+                         (.selectAll ".link")
+                         (.data links)
+                         .enter
+                         (.append "path")
+                         (.attr "class" "link")
+                         (.attr "d" diagonal))
+                     (let [node (-> svg
+                                    (.selectAll ".node")
+                                    (.data nodes)
+                                    .enter
+                                    (.append "g")
+                                    (.attr "class" "node")
+                                    (.attr "transform" (fn [d]
+
+                                                         (str "rotate("
+                                                              (- (.-x d) 90)
+                                                              ")translate("
+                                                              (.-y d)
+                                                              ")")
+                                                         (str "translate("
+                                                              (.-y d)
+                                                              ")"))))]
+                       (-> node
+                           (.append "circle")
+                           (.attr "r" 4.5))
+                       (-> node
+                           (.append "text")
+                           (.attr "dy" ".31em")
+                           (.text (fn [d] (.-name d))))
+                       )
+                     ))))
+      [:div "diag"])))
 
 (defn main-panel []
   (let [name (re-frame/subscribe [:name])]
     (fn []
+    (println "got it" (* 180 (.-PI js/Math)))
+
+
       [:div
-       [node-rings]
-       [svg-body]
-       ;[radial/main-panel]
+       [diag]
+       ;[node-rings]
+       ;[svg-body]
        ])))

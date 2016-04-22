@@ -18,10 +18,12 @@ body {
   fill: #800020;
   stroke: @border-color;
 
+
   text {
     // stroke: none;
     font-size: 1em;
     fill: white;
+    fill: black;
     stroke: none;
     // stroke: black;
   }
@@ -42,4 +44,26 @@ g.planes {
 line {
   stroke: @border-color;
   stroke: #800020;
+}
+
+line.link {
+  stroke: @border-color;
+  stroke: hotpink;
+}
+
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node {
+  font: 10px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
 }

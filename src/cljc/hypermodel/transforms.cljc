@@ -53,6 +53,8 @@
 (defn submap [m v]
       (assoc {} (last v) (get-in m v)))
 
+
+
 (defn pivot
       "Pivot a map around a nested key so that the key becomes the root element.
       Example:
@@ -68,3 +70,12 @@
                  nil)))
 
 
+(def model ['({:self :A, :parent nil})
+            '({:self :B, :parent :A} {:self :X, :parent :A})
+            '({:self :Y, :parent :B} {:self :C, :parent :B} {:self :E, :parent :B})
+            '({:self :D, :parent :C} {:self :A, :parent :E})
+            '({:self :E, :parent :D} {:self :B, :parent :A} {:self :X, :parent :A})])
+
+(defn radial [origin-x origin-y radius angle]
+  {:x (+ origin-x (* radius (Math/cos angle)))
+   :y (+ origin-y (* radius (Math/sin angle)))})

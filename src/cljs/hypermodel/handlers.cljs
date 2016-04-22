@@ -29,7 +29,8 @@
   (fn [db _]
     (let [cols (-> db :model :Gene :collections seq)]
       (fn [re])
-      (println "random" (get-random-from cols 4)))
+      ;(println "random" (get-random-from cols 4))
+      )
     db))
 
 (re-frame/register-handler

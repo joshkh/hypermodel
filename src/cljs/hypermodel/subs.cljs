@@ -21,3 +21,8 @@
   :data-rows
   (fn [db [_ degree]]
     (reaction (nth (:new @db) degree))))
+
+(re-frame/register-sub
+  :all-data
+  (fn [db [_]]
+    (reaction (:new @db))))
