@@ -136,6 +136,25 @@
        (for [c (range (count @data))]
          [node-ring c])])))
 
+
+(defn degree-ring [n]
+  (let [ring-data (re-frame/subscribe [:data-rows n])]
+    (fn []
+      ;(println "degree ring has" @ring-data)
+      [:g
+       (for [n @ring-data]
+         [:g.node
+          [:circle {:cx (:cx n)
+                    :cy (:cy n)
+                    :r (:r n)}]
+          [:text (str (name (:self n)))]])])))
+
+(defn degrees []
+  (let [data (re-frame/subscribe [:all-data])]
+    [:g
+     (for [d (range (count @data))]
+       [degree-ring d])]))
+
 (defn svg-body []
   [:svg.hyperview {:shape-rendering "crispEdges"
                    :text-rendering "optimizeLegibility"
@@ -144,17 +163,21 @@
                    :id "canvas"}
    [plane-guides]
    [:g {:transform center-str}
-    (for [a (range 0 360 )]
-      (let [pos (t/radial 0 0 100 a)]
-        (println pos)
-        [:circle {:cx (:x pos)
-                  :cy (:y pos)
-                  :r 1}]))]
+    [degrees]]
+   ;[:g {:transform center-str}
+   ; (for [a (range 0 360 )]
+   ;   (let [pos (t/radial 0 0 100 a)]
+   ;     ;(println pos)
+   ;     [:circle {:cx (:x pos)
+   ;               :cy (:y pos)
+   ;               :r 1}]))]
    ;[planes]
    ;[links]
    ;[dr]
    ;[model]
    ])
+
+
 
 
 (defn main-panel []

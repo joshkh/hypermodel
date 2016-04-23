@@ -77,5 +77,6 @@
             '({:self :E, :parent :D} {:self :B, :parent :A} {:self :X, :parent :A})])
 
 (defn radial [origin-x origin-y radius angle]
-  {:x (+ origin-x (* radius (Math/cos angle)))
+  (println "testing")
+  {:x (+ origin-x (* 2 radius (Math/cos angle)))
    :y (+ origin-y (* radius (Math/sin angle)))})
