@@ -4,7 +4,8 @@
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
             [hypermodel.radial :as radial]
-            [hypermodel.transforms :as t]))
+            [hypermodel.transforms :as t]
+            [json-html.core :as table]))
 
 (def dimensions (reagent/atom {:width 500
                                :height 500}))
@@ -104,10 +105,8 @@
 
         [:line.link {:x1 0 :y1 0 :x2 0 :y2 50}]))))
 
-(defn links []
-  [:g
-   (for [tier (range 1 5)]
-     [link tier])])
+;links
+
 
 (defn planes []
   [:g
@@ -147,7 +146,9 @@
           [:circle {:cx (:cx n)
                     :cy (:cy n)
                     :r (:r n)}]
-          [:text (str (name (:self n)))]])])))
+          [:text {:x (:cx n)
+                  :y (:cy n)}
+           (str (name (:self n)))]])])))
 
 (defn degrees []
   (let [data (re-frame/subscribe [:all-data])]
@@ -155,7 +156,7 @@
      (for [d (range (count @data))]
        [degree-ring d])]))
 
-(defn svg-body []
+(defn svg-body-old []
   [:svg.hyperview {:shape-rendering "crispEdges"
                    :text-rendering "optimizeLegibility"
                    :width (:width @dimensions)
@@ -178,13 +179,61 @@
    ])
 
 
+(defn recur-children [node total]
+  (let [new-total (conj total [:g.node
+                               {:on-click #(println (str node))}
+                               [:circle {:cx (:cx node)
+                                         :cy (:cy node)
+                                         :r  10}]
+                               [:text {:x (:cx node)
+                                       :y (:cy node)}
+                                (str (name (:name node)))]])]
+    (if (not-empty (:children node))
+      (doall (map (fn [x] (recur-children x new-total)) (:children node)))
+      new-total)))
+
+
+(defn recur-links [parent child total]
+  ;(println "called with child" child)
+  (if (empty? (:children child))
+    (conj total (conj total [:line {:x1 (:cx parent)
+                                    :y1 (:cy parent)
+                                    :x2 (:cx child)
+                                    :y2 (:cy child)}]))
+    (for [c (:children child)]
+      (recur-links child c total))))
+
+(defn links []
+  (let [data (re-frame/subscribe [:all-data])]
+    [:line {:x1 0
+            :y1 0
+            :x2 100
+            :y2 100}]))
+
+(defn svg-body []
+  (let [data (re-frame/subscribe [:all-data])]
+    (fn []
+      [:svg.hyperview {:shape-rendering "crispEdges"
+                       :text-rendering "optimizeLegibility"
+                       :width (:width @dimensions)
+                       :height (:height @dimensions)
+                       :id "canvas"}
+       [plane-guides]
+       [:g {:transform center-str}
+        (recur-links nil @data [:g.links])
+        ]
+       [:g {:transform center-str}
+        (recur-children @data [:g.nodes])]])))
 
 
 (defn main-panel []
-  (let [name (re-frame/subscribe [:name])]
+  (let [name (re-frame/subscribe [:name])
+        data (re-frame/subscribe [:all-data])]
     (fn []
       [:div
-       [node-rings]
+
+       ;[node-rings]
        [svg-body]
+       (table/edn->hiccup @data)
        ;[radial/main-panel]
        ])))

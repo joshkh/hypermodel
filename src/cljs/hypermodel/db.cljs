@@ -3,13 +3,58 @@
 (def default-db
   {:name  "hypermodel"
 
+   :new {:name :A
+         :children [
+                    {:name :B
+                     :children [
+                                ;{:name :X
+                                ; :children []}
+                                ;{:name :Y
+                                ; :children []}
+                                ]}
+                    {:name :C
+                     :children []}
+                    ;{:name :D
+                    ; :children [{:name :1111
+                    ;             :children []}
+                    ;            {:name :2222
+                    ;             :children []}]}
+                    {:name :E
+                     :children []}
+
+                    ]}
+
+   ;:new ['({:self :A, :parent nil})
+   ;      '({:self :B, :parent :A}
+   ;         {:self :C, :parent :A}
+   ;         {:self :D, :parent :A}
+   ;         {:self :E, :parent :A})
+   ;      '({:self :F, :parent :B}
+   ;         {:self :G, :parent :B})]
+
+   ;:untested [{:name "A"
+   ;            :children [{:name "B"
+   ;                        :children [{:name "X"
+   ;                                    :children [{:name "BOB"
+   ;                                                :children []}]}]}
+   ;                       {:name "C"
+   ;                        :children [{:name "LAST"
+   ;                                    :children []}]}]}]
+   :untested {:name "A"
+              :children [{:name "B"
+                          :children []}
+                         {:name "C"
+                          :children [{:name "F"
+                                      :children []}]}
+                         {:name "D"
+                          :children []}]}
 
 
-   :new ['({:self :A, :parent nil})
-         '({:self :B, :parent :A} {:self :X, :parent :A})
-         '({:self :Y, :parent :B} {:self :C, :parent :B} {:self :E, :parent :B})
-         '({:self :D, :parent :C} {:self :A, :parent :E})
-         '({:self :E, :parent :D} {:self :B, :parent :A} {:self :X, :parent :A})]
+   ;:new ['({:self :A, :parent nil})
+   ;      '({:self :B, :parent :A} {:self :X, :parent :A})
+   ;      '({:self :Y, :parent :B} {:self :C, :parent :B} {:self :E, :parent :B})
+   ;      '({:self :D, :parent :C} {:self :A, :parent :E})
+   ;      '({:self :E, :parent :D} {:self :B, :parent :A} {:self :X, :parent :A})]
 
    :tiers {:1 [{:node "CORE"}]
            :2 [{:node   "B2"

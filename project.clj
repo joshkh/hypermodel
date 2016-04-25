@@ -5,7 +5,8 @@
                  [re-frame "0.7.0"]
                  [compojure "1.5.0"]
                  [ring "1.4.0"]
-                 [cljs-http "0.1.40"]]
+                 [cljs-http "0.1.40"]
+                 [json-html "0.3.9"]]
 
   :min-lein-version "2.5.3"
 

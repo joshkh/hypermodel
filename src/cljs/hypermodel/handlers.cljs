@@ -5,6 +5,7 @@
               [cljs-http.client :as http]
               [clojure.set :as set]
               [hypermodel.transforms :as t]
+              [hypermodel.layout :as lo]
               [cljs.core.async :refer [chan <!]]))
 
 (defn unique-random-numbers [n]
@@ -42,11 +43,18 @@
 
 
 
+;(def modelv ['({:self :A, :parent nil})
+;             '({:self :B, :parent :A}{:self :X, :parent :A})
+;             '({:self :Y, :parent :B} {:self :C, :parent :B} {:self :E, :parent :B})
+;             '({:self :D, :parent :C} {:self :A, :parent :E})
+;             '({:self :E, :parent :D} {:self :B, :parent :A} {:self :X, :parent :A})])
+
 (def modelv ['({:self :A, :parent nil})
-             '({:self :B, :parent :A} {:self :X, :parent :A})
-             '({:self :Y, :parent :B} {:self :C, :parent :B} {:self :E, :parent :B})
-             '({:self :D, :parent :C} {:self :A, :parent :E})
-             '({:self :E, :parent :D} {:self :B, :parent :A} {:self :X, :parent :A})])
+             '({:self :B, :parent :A}
+                {:self :C, :parent :A}
+                {:self :D, :parent :A}
+                {:self :E, :parent :A})])
+
 
 (defn center-tier [tier]
   (map (fn [node]
@@ -82,6 +90,12 @@
    :y (+ origin-y (* radius (Math/sin (* angle (/ (.-PI js/Math) 180)))))})
 
 
+;(defn radial [origin-x origin-y radius angle]
+;  (println "testing")
+;  {:x (+ origin-x (* 2 radius (Math/cos (* angle (/ (.-PI js/Math) 180)))))
+;   :y (+ origin-y (* radius (Math/sin (* angle (/ (.-PI js/Math) 180)))))})
+
+
 (defn xy-center-tier [tiers]
   (map (fn [node]
          (println "xy-centering node" node)
@@ -96,11 +110,16 @@
               :else (conj total (nth tiers next-tier) )))
           [] (range 0 (count tiers))))
 
-
+(defn round2 [tiers]
+  (let [reversed (reverse tiers)]
+    (reduce (fn [total tier]
+              (let [grouped (group-by :parent tier)]
+                (println "grouped" grouped)))
+            [] reversed)))
 
 (re-frame/register-handler
   :bootstrap-app
   (fn [db _]
     (println "running")
     ;(go (re-frame/dispatch [:handle-bootstrap-model (<! (model "www.flymine.org/query")) ]))
-    (update db :new (comp place re-angle))))
+    (update db :new lo/space)))
