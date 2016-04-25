@@ -3,7 +3,7 @@
 
 (enable-console-print!)
 
-(def RADIUS 40)
+(def RADIUS 80)
 (def THETA (.-PI js/Math))
 (def PI (.-PI js/Math))
 
@@ -18,11 +18,7 @@
    :y (+ origin-y (* radius (Math/sin (* angle (/ (.-PI js/Math) 180)))))})
 
 
-(defn point [origin-x origin-y radius angle]
-  ;(println "parseFloat" js/parseF)
-  (println "point on circle sees angle" angle)
-  {:x (+ origin-x (* radius (Math/cos angle)))
-   :y (+ origin-y (* radius (Math/sin angle)))})
+
 
 
 (defn containment-circle [tier]
@@ -47,15 +43,15 @@
 
 
 
-(defn evenly-space [tier]
-  ;(println "evenly spacing" tier)
-  (let [chunks (/ 360 (count tier))]
-    (map-indexed (fn [index node]
-                   (let [{x :x y :y} (point 0 0 RADIUS (/ (* 2 index PI) (count tier)))]
-                     (println "first x y" x y)
-                     (assoc node :r 5
-                                 :cx x
-                                 :cy y))) tier)))
+;(defn evenly-space [tier]
+;  ;(println "evenly spacing" tier)
+;  (let [chunks (/ 360 (count tier))]
+;    (map-indexed (fn [index node]
+;                   (let [{x :x y :y} (point 0 0 RADIUS (/ (* 2 index PI) (count tier)))]
+;                     (println "first x y" x y)
+;                     (assoc node :r 5
+;                                 :cx x
+;                                 :cy y))) tier)))
 
 
 (defn center-tier [tier]
@@ -65,34 +61,34 @@
                      :cy 0
                      :r 5)) tier))
 
-(defn doit [parents tiers]
-  (println "doing it" tiers)
-  (let [grouped-parents (group-by :self parents)]
-    (println "parents" grouped-parents)
-    (map-indexed (fn [idx node]
-                   ;(println "parent has" (first ((:parent node) grouped-parents)))
-                   (let [parent (first ((:parent node) grouped-parents))
-                         m (count tiers)
-                         p1 (/ THETA 2)
-                         p2 (/ (* THETA idx) m)
-                         p3 (/ THETA (* 2 m))
-                         result (- PI (+ p1 p2 p3))
-                         r 60
-                         {x :x y :y} (point (:cx parent) (:cy parent) r result)]
-                     (println "working with parent" parent)
-                     (assoc node :cx x
-                                 :cy y
-                                 :r 5)))
-                 tiers)))
+;(defn doit [parents tiers]
+;  (println "doing it" tiers)
+;  (let [grouped-parents (group-by :self parents)]
+;    (println "parents" grouped-parents)
+;    (map-indexed (fn [idx node]
+;                   ;(println "parent has" (first ((:parent node) grouped-parents)))
+;                   (let [parent (first ((:parent node) grouped-parents))
+;                         m (count tiers)
+;                         p1 (/ THETA 2)
+;                         p2 (/ (* THETA idx) m)
+;                         p3 (/ THETA (* 2 m))
+;                         result (- PI (+ p1 p2 p3))
+;                         r 60
+;                         {x :x y :y} (point (:cx parent) (:cy parent) r result)]
+;                     (println "working with parent" parent)
+;                     (assoc node :cx x
+;                                 :cy y
+;                                 :r 5)))
+;                 tiers)))
 
-(defn position [tiers]
-  (reduce (fn [total next-tier]
-            (cond
-              (= next-tier 0) (conj total (center-tier (nth tiers next-tier)))
-              (= next-tier 1) (conj total (evenly-space (nth tiers next-tier)))
-              :else (conj total (doit (nth total (dec next-tier))
-                                      (nth tiers next-tier)))))
-          [] (range 0 (count tiers))))
+;(defn position [tiers]
+;  (reduce (fn [total next-tier]
+;            (cond
+;              (= next-tier 0) (conj total (center-tier (nth tiers next-tier)))
+;              (= next-tier 1) (conj total (evenly-space (nth tiers next-tier)))
+;              :else (conj total (doit (nth total (dec next-tier))
+;                                      (nth tiers next-tier)))))
+;          [] (range 0 (count tiers))))
 
 (defn layout [tiers]
   ;(println "POSITIONING")
@@ -123,26 +119,27 @@
 
 ;(def z (graph-zipper data))
 
-(defn x [tier]
-  ;(println "evenly spacing" tier)
-  (let [chunks (/ 360 (count tier))]
-    (map-indexed (fn [index node]
-                   (let [{x :x y :y} (point 0 0 RADIUS (/ (* 2 index PI) (count tier)))]
-                     (println "first x y" x y)
-                     (assoc node :r 5
-                                 :cx x
-                                 :cy y))) tier)))
+;(defn x [tier]
+;  ;(println "evenly spacing" tier)
+;  (let [chunks (/ 360 (count tier))]
+;    (map-indexed (fn [index node]
+;                   (let [{x :x y :y} (point 0 0 RADIUS (/ (* 2 index PI) (count tier)))]
+;                     (println "first x y" x y)
+;                     (assoc node :r 5
+;                                 :cx x
+;                                 :cy y))) tier)))
 
 (defn center-root [loc]
   (-> loc
       (zip/edit #(assoc % :cx 0
                           :cy 0))))
 
+(defn point [origin-x origin-y radius angle]
+  {:x (+ origin-x (* radius (Math/cos angle)))
+   :y (+ origin-y (* radius (Math/sin angle)))})
+
 (defn place-on-circle [magnitude index node]
-  (println "PLACE ON CIRCLE" node)
-  (println "TEST" (point 0 0 RADIUS (/ (* 2 index PI) magnitude)))
-  (let [{x :x y :y} (point 0 0 RADIUS (/ (* 2 index PI) magnitude))]
-    (println "x y" x y)
+  (let [{x :x y :y} (point 0 0 RADIUS (* index (/ (* 2 PI) magnitude)))]
     (assoc node :r 5
                 :cx x
                 :cy y)))
@@ -153,7 +150,7 @@
   index within its siblings (defaults to 1).
   This is used to calculate its polar coordinates."
   [z & [index]]
-  (let [index (if index index 1)
+  (let [index (if index index 0)
         magnitude (-> z zip/up zip/children count)
         updated (-> z (zip/edit (partial place-on-circle magnitude index)))]
     (if-let [more (zip/right updated)]
@@ -161,11 +158,28 @@
       (zip/leftmost updated))))
 
 (def data {:name :A
-           :children [{:name :B
+           :children [
+                      {:name :A1
+                       :children [
+                                  {:name :X
+                                   :children []}
+                                  {:name :Y
+                                   :children []}
+                                  ]}
+                      {:name :A2
                        :children []}
-                      {:name :C
-                       :children [{:name :2deep
-                                   :children []}]}]})
+                      ;{:name :D
+                      ; :children [{:name :1111
+                      ;             :children []}
+                      ;            {:name :2222
+                      ;             :children []}]}
+                      {:name :A3
+                       :children []}
+
+                      ;{:name :A4
+                      ; :children []}
+
+                      ]})
 
 (defn talk [loc]
   (println "talk called wiht loc" (zip/node loc))
@@ -204,12 +218,13 @@
           (recur (-> updated-loc zip/right) (inc idx)))))))
 
 (defn recur-children [loc]
-  (let [sibling-count (-> loc zip/up zip/children count)]
+  (let [parent (-> loc zip/up zip/node)]
     (loop [loc loc]
-      (if (nil? (-> loc zip/down))
-        loc
-        (place-kids (-> loc zip/down)))))
-  )
+      (let [self (-> loc zip/node)]
+        ;(println "ANGLE" (.atan2 js/Math (- (:cy self) (:cy parent)) (- (:cx self) (:cx parent))))
+        (if (nil? (-> loc zip/right))
+          loc
+          (recur (-> loc zip/right)))))))
 
 (defn space [data]
   (-> (graph-zipper data)
@@ -219,19 +234,67 @@
       recur-children
       zip/root))
 
+
+(defn reduce-children [loc]
+  (reduce (fn [z next]
+            (println "has next zip" (-> z zip/node))
+            z)
+          loc [1 2 3])
+  loc)
+
 (defn test-space [data]
   (-> (graph-zipper data)
       center-root
       zip/down
-      space-evenly
-      talk
-      zip/root
-      ;recur-children
-      ))
+      reduce-children))
 
 ;(println "test-space" (test-space data))
 
+(def x {:self :A
+        :cx 0
+        :cy 0
+        :children ({:self :C
+                    :children ()
+                    :banana 1}
+                    {:self :B
+                     :children ({:self :D
+                                 :children ()
+                                 :banana 1}
+                                 {:self :D
+                                  :children []
+                                  :banana 1})
+                     :banana 1}
+                    {:self :B
+                     :children [{:self :D
+                                 :children []}]
+                     :banana 1}
+                    {:self :C, :children [], :banana 1})}
 
+(def m {:self     :A
+        :cx       0
+        :cy       0
+        :children [{:self     :B
+                    :children [{:self     :D
+                                :children []}]}
+                   {:self     :C
+                    :children []}]})
+
+
+  )
+(defn bfirst [m & siblings]
+  (let [{:keys [self children]} m]
+    (let [placed-children (map-indexed (fn [idx child]
+                                         (assoc child :banana 1)) children)]
+      (reduce (fn [new-m next]
+                (update new-m :children conj (bfirst next)))
+              (assoc m :children placed-children) placed-children)
+      ;(reduce (fn [total next]
+      ;          ()))
+      )))
+
+(println "res" (bfirst m))
+
+;(println (seq m))
 
 
 ;(recur-map data)

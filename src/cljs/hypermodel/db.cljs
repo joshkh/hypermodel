@@ -5,22 +5,25 @@
 
    :new {:name :A
          :children [
-                    {:name :B
+                    {:name :A1
                      :children [
-                                ;{:name :X
-                                ; :children []}
-                                ;{:name :Y
-                                ; :children []}
+                                {:name :X
+                                 :children []}
+                                {:name :Y
+                                 :children []}
                                 ]}
-                    {:name :C
+                    {:name :A2
                      :children []}
                     ;{:name :D
                     ; :children [{:name :1111
                     ;             :children []}
                     ;            {:name :2222
                     ;             :children []}]}
-                    {:name :E
+                    {:name :A3
                      :children []}
+
+                    ;{:name :A4
+                    ; :children []}
 
                     ]}
 
