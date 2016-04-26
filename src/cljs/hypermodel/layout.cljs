@@ -250,26 +250,6 @@
 
 ;(println "test-space" (test-space data))
 
-(def x {:self :A
-        :cx 0
-        :cy 0
-        :children ({:self :C
-                    :children ()
-                    :banana 1}
-                    {:self :B
-                     :children ({:self :D
-                                 :children ()
-                                 :banana 1}
-                                 {:self :D
-                                  :children []
-                                  :banana 1})
-                     :banana 1}
-                    {:self :B
-                     :children [{:self :D
-                                 :children []}]
-                     :banana 1}
-                    {:self :C, :children [], :banana 1})}
-
 (def m {:self     :A
         :cx       0
         :cy       0
@@ -280,14 +260,16 @@
                     :children []}]})
 
 
-  )
 (defn bfirst [m & siblings]
   (let [{:keys [self children]} m]
+    (println "SIBLINGS" siblings)
     (let [placed-children (map-indexed (fn [idx child]
                                          (assoc child :banana 1)) children)]
       (reduce (fn [new-m next]
-                (update new-m :children conj (bfirst next)))
-              (assoc m :children placed-children) placed-children)
+                (println "NEXT" next)
+                (println "new m" new-m)
+                (assoc-in new-m [:children next] (bfirst (get placed-children next))))
+              (assoc m :children placed-children) (range 0 (count placed-children)))
       ;(reduce (fn [total next]
       ;          ()))
       )))
